@@ -5,6 +5,8 @@ import requests
 load_dotenv()
 
 def converts_currency(to: str, fro: str, amount: float) -> float:
+    """ Функция конвертирует валютую по текущему курсу валют """
+
     apilayer_token = os.getenv('API_KEY_APILAYER')
 
     if not apilayer_token:
@@ -20,7 +22,7 @@ def converts_currency(to: str, fro: str, amount: float) -> float:
     }
 
     headers = {
-        'Authorization': f'apikey {apilayer_token}'
+        "apikey": f"{apilayer_token}"
     }
 
     response = requests.get(url, headers=headers, params=params)

@@ -13,6 +13,7 @@ def returns_a_list_of_transactions(file_path: str) -> list:
 
 
 def returns_the_transaction_amount(transactions: list) -> float:
+    """ Функция возвращает суммы транзакций """
     if not transactions:
         return 0.0
 
