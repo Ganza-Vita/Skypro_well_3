@@ -4,7 +4,7 @@ import requests
 
 load_dotenv()
 
-def converts_currency(to: str, fro: str, amount: float) -> float:
+def converts_currency(dict_transactions) -> float:
     """ Функция конвертирует валютую по текущему курсу валют """
 
     apilayer_token = os.getenv('API_KEY_APILAYER')
@@ -15,11 +15,7 @@ def converts_currency(to: str, fro: str, amount: float) -> float:
 
     url = 'https://api.apilayer.com/exchangerates_data/convert'
 
-    params = {
-        'to': to,
-        'from': fro,
-        'amount': amount
-    }
+    params = dict_transactions
 
     headers = {
         "apikey": f"{apilayer_token}"

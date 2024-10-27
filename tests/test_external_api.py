@@ -13,7 +13,7 @@ def test_external_api(mock_getenv, mock_get):
     mock_response.json.return_value = {'result': 0.0}
     mock_get.return_value = mock_response
 
-    assert converts_currency("USD", "RUB", 100) == 0.0
+    assert converts_currency({"to":"USD", "from":"RUB", "amount":100}) == 0.0
 
     mock_get.assert_called_once_with(
         "https://api.apilayer.com/exchangerates_data/convert",

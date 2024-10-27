@@ -1,13 +1,16 @@
 import json
 
-from external_api import converts_currency
+# from src.external_api import converts_currency
 
 
 def returns_a_list_of_transactions(file_path: str) -> list:
     """ Функция возвращает список словарей с транзакиями из JSON-файла """
     try:
-        with open(file_path, 'r', encoding='utf-8') as file_transaction:
-            return json.load(file_transaction)
+        if file_path != []:
+            with open(file_path, 'r', encoding='utf-8') as file_transaction:
+                return json.load(file_transaction)
+        else:
+            return []
     except (FileNotFoundError, UnicodeDecodeError) as e:
         return []
 
@@ -23,9 +26,13 @@ def returns_the_transaction_amount(transactions: list) -> float:
         if transaction.get("operationAmount") and transaction["operationAmount"]["currency"]["code"] == "RUB":
             total_amount += float(transaction["operationAmount"]["amount"])
         elif transaction.get("operationAmount"):
+            dict_transaction = {}
             currency_code = transaction["operationAmount"]["currency"]["code"]
             amount = transaction["operationAmount"]["amount"]
-            total_amount += converts_currency("RUB", currency_code, float(amount))
+            dict_transaction["to"] = "RUB"
+            dict_transaction["from"] = currency_code
+            dict_transaction["amount"] = amount
+            total_amount += converts_currency(dict_transaction)
 
     return total_amount
 
