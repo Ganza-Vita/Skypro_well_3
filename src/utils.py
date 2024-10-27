@@ -4,10 +4,10 @@ import json
 
 
 def returns_a_list_of_transactions(file_path: str) -> list:
-    """ Функция возвращает список словарей с транзакиями из JSON-файла """
+    """Функция возвращает список словарей с транзакиями из JSON-файла"""
     try:
         if file_path != []:
-            with open(file_path, 'r', encoding='utf-8') as file_transaction:
+            with open(file_path, "r", encoding="utf-8") as file_transaction:
                 return json.load(file_transaction)
         else:
             return []
@@ -16,7 +16,7 @@ def returns_a_list_of_transactions(file_path: str) -> list:
 
 
 def returns_the_transaction_amount(transactions: list) -> float:
-    """ Функция возвращает суммы транзакций """
+    """Функция возвращает суммы транзакций"""
     if not transactions:
         return 0.0
 
@@ -37,8 +37,7 @@ def returns_the_transaction_amount(transactions: list) -> float:
     return total_amount
 
 
-
-file_path = 'C:\\Users\\Bulat\\PycharmProjects\\Skypro_well_3\\data\\operations.json'
+file_path = "C:\\Users\\Bulat\\PycharmProjects\\Skypro_well_3\\data\\operations.json"
 transactions = returns_a_list_of_transactions(file_path)
 
 total_in_rub = returns_the_transaction_amount(transactions)
