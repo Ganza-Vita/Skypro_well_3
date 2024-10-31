@@ -2,8 +2,7 @@ from unittest.mock import mock_open, patch
 
 import pytest
 
-from src.finance_operations import read_financial_operations_from_csv, read_financial_operations_from_excel
-
+from src.finance_operations import read_financial_operations_from_csv, read_financial_operations_from_excel, search_transactions, count_transaction_types
 
 # Тестирование для CSV
 def test_read_financial_operations_from_csv():
@@ -65,3 +64,27 @@ def test_read_financial_operations_from_excel():
     ]
 
     assert result == expected
+
+
+def test_search_transactions():
+    transactions = [
+        {'description': 'Перевод организации'},
+        {'description': 'Открытие вклада'},
+        {'description': 'Перевод с карты на карту'},
+    ]
+
+    result = search_transactions(transactions, 'перевод')
+    assert len(result) == 2
+
+
+def test_count_transaction_types():
+    transactions = [
+        {'description': 'Перевод организации'},
+        {'description': 'Открытие вклада'},
+        {'description': 'Перевод с карты на карту'},
+        {'description': 'Перевод с карты на карту'},
+    ]
+
+    result = count_transaction_types(transactions, ['Перевод с карты на карту', 'Открытие вклада'])
+    assert result['Перевод с карты на карту'] == 2
+    assert result['Открытие вклада'] == 1
