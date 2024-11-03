@@ -1,69 +1,78 @@
 import json
 import pandas as pd
-from src.finance_operations import search_transactions, count_transaction_types
+from src.masks import get_mask_card_number, get_mask_account
+
+
+def format_date(date_string):
+    """Форматирует дату в формат DD.MM.YYYY."""
+    if pd.notna(date_string):  # Проверяем, что значение не NaN
+        return pd.to_datetime(date_string).strftime('%d.%m.%Y')
+    return date_string
 
 
 def main():
-    print("Привет! Добро пожаловать в программу работы с банковскими транзакциями.")
+    print("Привет!\nДобро пожаловать в программу работы с банковскими транзакциями.")
     print("Выберите необходимый пункт меню:")
     print("1. Получить информацию о транзакциях из JSON-файла")
     print("2. Получить информацию о транзакциях из CSV-файла")
     print("3. Получить информацию о транзакциях из XLSX-файла")
-
     choice = input("Пользователь: ")
-
     if choice == "1":
         file_path = input("Введите путь к JSON-файлу: ")
         with open(file_path) as f:
             transactions = json.load(f)
-
     elif choice == "2":
         file_path = input("Введите путь к CSV-файлу: ")
-        transactions = pd.read_csv(file_path, delimiter=';').rename(columns=lambda x: x.strip().lower()).to_dict(orient='records')
-
+        transactions = pd.read_csv(file_path, delimiter=';').rename(columns=lambda x: x.strip().lower()).to_dict(
+            orient='records')
     elif choice == "3":
         file_path = input("Введите путь к XLSX-файлу: ")
         transactions = pd.read_excel(file_path).to_dict(orient='records')
     else:
         print("Неверный выбор.")
         return
-
+    data_exists = False  # Флаг для проверки наличия данных
+    for t in transactions:
+        from_value = t.get('from')  # Получаем значение по ключу 'from'
+        if pd.isna(from_value):  # Проверка на NaN
+            t['masked_from'] = "Данные отсутствуют."
+            continue
+        elif isinstance(from_value, str):  # Проверяем, что значение является строкой
+            digits = ''.join(filter(str.isdigit, from_value))  # Извлекаем только цифры
+            if len(digits) == 16:  # Если это 16 цифр
+                t['masked_from'] = get_mask_card_number(digits)
+            elif len(digits) >= 4:  # Если это больше или равно 4 цифрам, но не 16
+                t['masked_from'] = get_mask_account(digits)
+            else:
+                t['masked_from'] = from_value  # Если цифр меньше 4, оставляем как есть
+            data_exists = True  # Обновляем флаг, что данные найдены
+        else:
+            t['masked_from'] = "Неизвестный формат данных."
+    if not data_exists:  # Если данных не было найдено
+        print("Данные отсутствуют.")
+        return
     while True:
         status = input(
-            "Введите статус, по которому необходимо выполнить фильтрацию. Доступные для фильтровки статусы: EXECUTED, CANCELED, PENDING\nПользователь: ").strip().lower()
+            "Введите статус, по которому необходимо выполнить фильтрацию.\n"
+            "Доступные для фильтровки статусы: EXECUTED, CANCELED, PENDING\nПользователь: "
+        ).strip().lower()
         if status in ['executed', 'canceled', 'pending']:
             print(f'Операции отфильтрованы по статусу "{status.upper()}"')
-            filtered_transactions = [t for t in transactions if 'state' in t and isinstance(t['state'], str) and t['state'].lower() == status]
-
+            filtered_transactions = [
+                t for t in transactions if 'state' in t and isinstance(t['state'], str) and t['state'].lower() == status
+            ]
+            # Проверка на наличие отфильтрованных транзакций
             if not filtered_transactions:
-                print("Не найдено ни одной транзакции, подходящей под ваши условия фильтрации.")
-                return
-
-            sort_choice = input("Отсортировать операции по дате? Да/Нет\nПользователь: ").strip().lower()
-            if sort_choice == 'да':
-                sort_order = input("Отсортировать по возрастанию или по убыванию?\nПользователь: ").strip().lower()
-                filtered_transactions.sort(key=lambda x: x['date'], reverse=(sort_order == 'по убыванию'))
-
-            currency_filter = input("Выводить только рублевые транзакции? Да/Нет\nПользователь: ").strip().lower()
-            if currency_filter == 'да':
-                filtered_transactions = [t for t in filtered_transactions if t['currency_code'] == 'RUB']
-
-            description_filter = input(
-                "Отфильтровать список транзакций по определенному слову в описании? Да/Нет\nПользователь: ").strip().lower()
-            if description_filter == 'да':
-                query = input("Введите строку для поиска в описании: ")
-                filtered_transactions = search_transactions(filtered_transactions, query)
-
-            # Вывод результата
-            print("Распечатываю итоговый список транзакций...")
-            print(f"Всего банковских операций в выборке: {len(filtered_transactions)}")
-
-            for transaction in filtered_transactions:
-                print(
-                    f"{transaction['date']} {transaction['description']}\nСчет {transaction['from']}\nСумма: {transaction['amount']} {transaction['currency_code']}\n")
+                print("Не найдено ни одной транзакции, соответствующей критериям.")
+            else:
+                for transaction in filtered_transactions:
+                    print(f"{format_date(transaction['date'])} - {transaction['description']}")
+                    # Используем 'masked_from', так как теперь он определен для каждой транзакции.
+                    print(f"Счет: {transaction.get('masked_from', 'Данные отсутствуют.')}")
+                    print(f"Сумма: {transaction['amount']} {transaction['currency_code']}\n")
             break
         else:
-            print(f'Статус операции "{status}" недоступен.')
+            print(f'Статус "{status}" недоступен.\nПожалуйста, введите корректный статус.')
 
 
 if __name__ == "__main__":
