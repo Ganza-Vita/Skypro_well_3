@@ -1,5 +1,6 @@
-import os
 import logging
+import os
+
 import requests
 from dotenv import load_dotenv
 
@@ -7,7 +8,7 @@ load_dotenv()
 
 logger = logging.getLogger("external_api")
 logger.setLevel(logging.DEBUG)
-file_handler = logging.FileHandler("logs\\external_api.log", 'w', encoding='UTF-8')
+file_handler = logging.FileHandler("logs\\external_api.log", "w", encoding="UTF-8")
 file_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s: %(message)s")
 file_handler.setFormatter(file_formatter)
 logger.addHandler(file_handler)

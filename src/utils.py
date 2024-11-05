@@ -3,13 +3,13 @@ import logging
 
 from src.external_api import converts_currency
 
-
 logger = logging.getLogger("utils")
 logger.setLevel(logging.DEBUG)
-file_handler = logging.FileHandler("logs\\utils.log", 'w', encoding='UTF-8')
+file_handler = logging.FileHandler("logs\\utils.log", "w", encoding="UTF-8")
 file_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s: %(message)s")
 file_handler.setFormatter(file_formatter)
 logger.addHandler(file_handler)
+
 
 def returns_a_list_of_transactions(file_path: str) -> list:
     """Функция возвращает список словарей с транзакиями из JSON-файла"""
@@ -38,8 +38,7 @@ def returns_the_transaction_amount(transactions: list) -> float:
         if transaction.get("operationAmount") and transaction["operationAmount"]["currency"]["code"] == "RUB":
             total_amount += float(transaction["operationAmount"]["amount"])
         elif transaction.get("operationAmount"):
-            logging.info(
-                f"Возврат суммы транзакций, если валюта транзакции не 'RUB'")
+            logging.info(f"Возврат суммы транзакций, если валюта транзакции не 'RUB'")
             dict_transaction = {}
             currency_code = transaction["operationAmount"]["currency"]["code"]
             amount = transaction["operationAmount"]["amount"]
